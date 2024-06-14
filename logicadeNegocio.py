@@ -1,5 +1,5 @@
 import sqlite3 as sql
-import lab
+import membros
 #Regra de negocio
 #consultar livros disponiveis
 #devolucao (remover livros do ephrem)
@@ -32,7 +32,7 @@ def select():
     print (a)
 
 
-membro1= lab.membro( 2, "fabao","14/06", "perto do aeroporto" )
+membro1= membros.membro( 2, "fabao","14/06", "perto do aeroporto" )
 #print (membro1)
 membro1.cadastrarMembro()
 select()
