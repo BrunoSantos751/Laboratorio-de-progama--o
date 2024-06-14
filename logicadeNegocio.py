@@ -1,4 +1,5 @@
 import sqlite3 as sql
+import lab
 #Regra de negocio
 #consultar livros disponiveis
 #devolucao (remover livros do ephrem)
@@ -25,9 +26,13 @@ def condicionalEmprestimo(x):
         return False
 
 def select():
-    comando = 'SELECT * from livrosDisponiveis'
+    comando = 'SELECT * from membros'
     cursor.execute(comando)
     a=cursor.fetchall()
     print (a)
 
 
+membro1= lab.membro( 2, "fabao","14/06", "perto do aeroporto" )
+#print (membro1)
+membro1.cadastrarMembro()
+select()
