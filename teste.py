@@ -21,4 +21,4 @@ def insert():
     cursor.execute(inserir, regitros)
     conexao.commit()
 
-select()
+#select()
