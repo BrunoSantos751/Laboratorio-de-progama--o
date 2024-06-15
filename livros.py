@@ -25,7 +25,6 @@ class Livro:
 
     def deletarLivro(self):
         inserir = 'DELETE FROM livros WHERE isbn = (' + str(self.ISBN) + ")" 
-        print (inserir)
         cursor.execute(inserir)
         conexao.commit()
 

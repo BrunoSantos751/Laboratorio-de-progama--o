@@ -23,7 +23,11 @@ class membro():
         cursor.execute(inserir, regitros)
         conexao.commit()
 
-
+    def deletarMembro(self):
+        inserir = 'DELETE FROM Membros WHERE ID = ?'
+        print(inserir)
+        cursor.execute(inserir, (self.ID,))
+        conexao.commit()
 
 
 

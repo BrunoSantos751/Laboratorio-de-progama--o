@@ -4,6 +4,7 @@ from tkinter import *
 from ttkbootstrap.constants import *
 import logicadeNegocio
 import livros
+import membros
 
 def controle():
     pass
@@ -38,6 +39,20 @@ def menu_button(x):
     back = ttk.Button(root, text="Voltar", style='info.Tbutton', command= x)
     back.place(x=10, y=10)
 
+def operacaoConcluida():#confirmar que o codigo foi executado e retornar para o menu
+    clear_widgets()
+    label=ttk.Label(root, text='Operação concluida', font= ('Roboto', 20))
+    label.pack( pady=50)
+    back = ttk.Button(root, text="Voltar", style='info.Outline.Tbutton', command=mainMenu)
+    back.pack(pady=10)
+
+
+def dataList(x):
+    getList = logicadeNegocio.select(x)
+    # A função fetchall() retorna uma lista de tuplas, precisamos extrair os valores de dentro das tuplas
+    list = [str(item[0]) +' - '+ str(item[1]) for item in getList]
+    return (list) 
+
 def telaLivros():
     clear_widgets()
     menu_button(mainMenu)
@@ -46,7 +61,7 @@ def telaLivros():
     label.pack(padx= 30, pady=20)
     createButton('Consultar livros', 10, consultarLivro)
     createButton('Adicionar livros', 10, addLivros)
-    createButton('Remover livros', 10, controle)
+    createButton('Remover livros', 10, removerLivros)
 
 def consultarLivro():
     clear_widgets()
@@ -77,8 +92,6 @@ def consultarLivro():
     )
 
     table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-
-
 
 def addLivros():
     clear_widgets()
@@ -119,8 +132,27 @@ def addLivros():
 def callLivro(ISBN, titulo, autor, ano, genero):
     livro1= livros.Livro(ISBN, titulo, autor, ano, genero )
     livro1.cadastrarLivro()
-    mainMenu()
-    
+    operacaoConcluida()
+
+
+def removerLivros():
+    clear_widgets()
+    label=ttk.Label(root, text='        Qual livro deseja remover?', font= ('Roboto', 15))
+    label.pack( pady=20)
+    menu_button(telaLivros)
+    label=ttk.Label(root, text='Clique na setinha e escolha a opção a ser removida:', font= ('Roboto', 10))
+    label.pack( pady=20)
+    ISBN=ttk.Combobox(root,bootstyle="info", font=("Helvetica", 15), values= dataList('livros'))
+    ISBN.pack (pady = 5)
+    b=ttk.Button(root, text='confirmar', style='success.TButton', command= lambda: callrl(ISBN.get()))
+    b.pack(pady = 10)
+
+def callrl(x):
+    elementos = x.split(' - ')
+    ISBN= elementos[0]
+    livro= livros.Livro(ISBN, 'teste', 'teste', 2005, 'teste')
+    livro.deletarLivro()
+    operacaoConcluida()
 
 def telaMembros():
     root.geometry('400x350')
@@ -128,12 +160,9 @@ def telaMembros():
     menu_button(mainMenu)
     label=ttk.Label(root, text='Escolha uma opção:', font= ('Roboto', 15))
     label.pack(padx= 30, pady=20)
-    b2= ttk.Button(root, text='Consultar membros', style='info.TButton', width=18, command= consutarMembros)
-    b2.pack(pady=10)
-    b1= ttk.Button(root, text='Cadastrar', style='info.TButton', width=18, command=addMembro)
-    b1.pack(pady=10)
-    b3= ttk.Button(root, text='Remover membros', style='info.TButton', width=18)
-    b3.pack(pady=10)
+    createButton('Consultar membros', 10, consutarMembros)
+    createButton('Cadastrar membros', 10, addMembro)
+    createButton('Remover membros', 10, removerMembros)
 
 def addMembro():
     clear_widgets()
@@ -155,7 +184,7 @@ def addMembro():
 
     label3=ttk.Label(root, text='Data de nascimento:', font= ('Roboto', 10))
     label3.pack(pady=2)
-    dataDeNascimento= ttk.Entry(root, style= 'light.Outline.TButton', width=18)
+    dataDeNascimento= ttk.DateEntry(root, style= 'light.Outline.TButton', width=15)
     dataDeNascimento.pack(pady=2)
 
     label4=ttk.Label(root, text='Endereço', font= ('Roboto', 10))
@@ -163,8 +192,14 @@ def addMembro():
     endereco= ttk.Entry(root, style= 'light.Outline.TButton', width=18)
     endereco.pack(pady=2)
 
-    b=ttk.Button(root, text='confirmar', style='success.TButton')
+    b=ttk.Button(root, text='confirmar', style='success.TButton', command= lambda: callMembro(ID.get(), nome.get(), dataDeNascimento.entry.get(), endereco.get()))
     b.place(x=320, y= 10)
+
+def callMembro(ID, nome, dataDeNascimento, endereco):
+    print (ID, nome, dataDeNascimento, endereco)
+    membro= membros.membro(ID, nome, dataDeNascimento, endereco)
+    membro.cadastrarMembro()
+    operacaoConcluida()
 
 def consutarMembros():
     clear_widgets()
@@ -195,20 +230,38 @@ def consutarMembros():
 
     table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
+
+def removerMembros():
+    clear_widgets()
+    label=ttk.Label(root, text='        Qual membro deseja remover?', font= ('Roboto', 15))
+    label.pack( pady=20)
+    menu_button(telaMembros)
+    label=ttk.Label(root, text='Clique na setinha e escolha a opção a ser removida:', font= ('Roboto', 10))
+    label.pack( pady=20)
+    ID=ttk.Combobox(root,bootstyle="info", font=("Helvetica", 15), values= dataList('membros'))
+    ID.pack (pady = 5)
+    b=ttk.Button(root, text='confirmar', style='success.TButton', command= lambda: callrm(ID.get()))
+    b.pack(pady = 10)
+
+
+def callrm(x):
+    elementos = x.split(' - ')
+    ID= elementos[0]
+    membro= membros.membro(ID, 'teste', 'teste', 2005)
+    membro.deletarMembro()
+    operacaoConcluida()
+
+
 def telaEmprestimo():
     clear_widgets()
     menu_button(mainMenu)
     root.geometry('400x350')
     label=ttk.Label(root, text='Escolha uma opção:', font= ('Helvetica', 15))
     label.pack(padx= 30, pady=20)
-    b1= ttk.Button(root, text='Consultar emprestimo', style='info.TButton', width=18, command= consultarEmprestimo)
-    b1.pack(pady=10)
-    b2= ttk.Button(root, text='Registrar emprestimo', style='info.TButton', width=18, command= addEmprestimo)
-    b2.pack(pady=10)
-    b3= ttk.Button(root, text='Devolução', style='info.TButton', width=18)
-    b3.pack(pady=10)
-    b4= ttk.Button(root, text='Livros disponiveis', style='info.TButton', width=18)
-    b4.pack(pady=10)
+    createButton('Consultar emprestimo', 10, consultarEmprestimo)
+    createButton('Registrar emprestimo', 10, addEmprestimo)
+    createButton('Devolução livros', 10, controle)
+    createButton('Livros disponiveis', 10, controle)
 
 
 def consultarEmprestimo():
@@ -267,12 +320,12 @@ def addEmprestimo():
 
     label4=ttk.Label(root, text='Data emprestimo', font= ('Roboto', 10))
     label4.pack(pady=2)
-    dataEmprestimo= ttk.Entry(root, style= 'light.Outline.TButton', width=18)
+    dataEmprestimo= ttk.DateEntry(root, style= 'light.Outline.TButton', width=15)
     dataEmprestimo.pack(pady=2)
 
     label5=ttk.Label(root, text='Data devolução:', font= ('Roboto', 10))
     label5.pack(pady=2)
-    dataDevolucao= ttk.Entry(root, style= 'light.Outline.TButton', width=18)
+    dataDevolucao= ttk.DateEntry(root, style= 'light.Outline.TButton', width=15)
     dataDevolucao.pack(pady=2)
 
     b=ttk.Button(root, text='confirmar', style='success.TButton')
@@ -284,12 +337,9 @@ def mainMenu():
     root.geometry('400x350')
     label=ttk.Label(root, text='Escolha uma opção:', font= ('Helvetica', 15))
     label.pack(padx= 30, pady=20)
-    b1= ttk.Button(root, text='Livros', style='info.TButton', width=18, command= telaLivros)
-    b1.pack(pady=10)
-    b2= ttk.Button(root, text='Membros', style='info.TButton', width=18, command= telaMembros)
-    b2.pack(pady=10)
-    b3= ttk.Button(root, text='Emprestimo', style='info.TButton', width=18, command= telaEmprestimo)
-    b3.pack(pady=10)
+    createButton('Livros', 10, telaLivros)
+    createButton('Membros', 10, telaMembros)
+    createButton('Emprestimos', 10, telaEmprestimo)
 
 
 
