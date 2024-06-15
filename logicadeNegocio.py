@@ -10,7 +10,7 @@ cursor= conexao.cursor()
 
 #criando nova tabela para livros disponiveis
 def disponiveis():
-    cursor.execute('Select ISBN, TITULO from livros where ISBN not in (select ISBN from emprestimos )')
+    cursor.execute('Select * from livros where ISBN not in (select ISBN from emprestimos )')
     disponiveis= cursor.fetchall()
     return (disponiveis)
 
@@ -20,7 +20,6 @@ def condicionalEmprestimo(x):
     comando = ('SELECT membro, COUNT(membro)  FROM emprestimos where membro ='  + '"' + x + '"')
     cursor.execute(comando)
     x,condicional= (cursor.fetchall()[0])
-    print (condicional)
     if condicional < 3:
         return True
     else:

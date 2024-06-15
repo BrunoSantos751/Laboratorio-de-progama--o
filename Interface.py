@@ -5,7 +5,8 @@ from ttkbootstrap.constants import *
 import logicadeNegocio
 import livros
 import membros
-
+import emprestimo
+from ttkbootstrap.dialogs import Messagebox
 def controle():
     pass
 
@@ -46,13 +47,14 @@ def operacaoConcluida():#confirmar que o codigo foi executado e retornar para o 
     back = ttk.Button(root, text="Voltar", style='info.Outline.Tbutton', command=mainMenu)
     back.pack(pady=10)
 
-
 def dataList(x):
     getList = logicadeNegocio.select(x)
     # A função fetchall() retorna uma lista de tuplas, precisamos extrair os valores de dentro das tuplas
     list = [str(item[0]) +' - '+ str(item[1]) for item in getList]
     return (list) 
 
+
+#Telas para chamar funções
 def telaLivros():
     clear_widgets()
     menu_button(mainMenu)
@@ -62,6 +64,7 @@ def telaLivros():
     createButton('Consultar livros', 10, consultarLivro)
     createButton('Adicionar livros', 10, addLivros)
     createButton('Remover livros', 10, removerLivros)
+    createButton('Livros disponiveis', 10, livrosDiponiveis)
 
 def consultarLivro():
     clear_widgets()
@@ -153,6 +156,36 @@ def callrl(x):
     livro= livros.Livro(ISBN, 'teste', 'teste', 2005, 'teste')
     livro.deletarLivro()
     operacaoConcluida()
+
+def livrosDiponiveis():
+    clear_widgets()
+    root.geometry('600x350')
+    label=ttk.Label(root, text='              Verifique a sua tabela a baixo:', font= ('Roboto', 15))
+    label.pack( pady=5)
+   
+    menu_button(telaLivros)
+    colors = root.style.colors
+    columns = [
+        {"text": "ISBN", "stretch": True},
+        {"text": "TITULO", "stretch": True},
+        {"text": "Autor", "stretch": True},
+        {"text": "Ano de publicação", "stretch": True},
+        {"text": "genero", "stretch": True}
+    ]
+
+    row_data = logicadeNegocio.disponiveis()
+    table = Tableview(
+        master=root,
+        coldata=columns,
+        rowdata=row_data,
+        paginated=True,
+        autofit=True,
+        searchable=True,
+        bootstyle=INFO,
+        stripecolor=(colors.light)
+    )
+
+    table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
 def telaMembros():
     root.geometry('400x350')
@@ -260,9 +293,7 @@ def telaEmprestimo():
     label.pack(padx= 30, pady=20)
     createButton('Consultar emprestimo', 10, consultarEmprestimo)
     createButton('Registrar emprestimo', 10, addEmprestimo)
-    createButton('Devolução livros', 10, controle)
-    createButton('Livros disponiveis', 10, controle)
-
+    createButton('Devolução livros', 10, devolucaoEmprestimo)
 
 def consultarEmprestimo():
     clear_widgets()
@@ -294,7 +325,6 @@ def consultarEmprestimo():
 
     table.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
-
 def addEmprestimo():
     clear_widgets()
     menu_button(telaEmprestimo)
@@ -318,24 +348,51 @@ def addEmprestimo():
     membro= ttk.Entry(root, style= 'light.Outline.TButton', width=18)
     membro.pack(pady=2)
 
-    label4=ttk.Label(root, text='Data emprestimo', font= ('Roboto', 10))
-    label4.pack(pady=2)
-    dataEmprestimo= ttk.DateEntry(root, style= 'light.Outline.TButton', width=15)
-    dataEmprestimo.pack(pady=2)
+    #label4=ttk.Label(root, text='Data emprestimo', font= ('Roboto', 10))
+    #label4.pack(pady=2)
+    #dataEmprestimo= ttk.DateEntry(root, style= 'light.Outline.TButton', width=15)
+    #dataEmprestimo.pack(pady=2)
 
     label5=ttk.Label(root, text='Data devolução:', font= ('Roboto', 10))
     label5.pack(pady=2)
     dataDevolucao= ttk.DateEntry(root, style= 'light.Outline.TButton', width=15)
     dataDevolucao.pack(pady=2)
 
-    b=ttk.Button(root, text='confirmar', style='success.TButton')
+    b=ttk.Button(root, text='confirmar', style='success.TButton', command= lambda: callEmprestimo(ISBN.get(), Titulo.get(), membro.get(), dataDevolucao.entry.get()))
     b.place(x=320, y= 10)
 
+def callEmprestimo(isbn, titulo, membro, dataDevolucao):
+    emprestimo1= emprestimo.Emprestimo(isbn, titulo, membro, dataDevolucao)
+    controle = emprestimo1.registrarEmprestimo()
+    if controle:
+        operacaoConcluida()
+    else:
+        Messagebox.show_error("Voce já possui 3 emprestimos registrados sem devolução!", "Emprestimo negado")
 
+def devolucaoEmprestimo():
+    clear_widgets()
+    label=ttk.Label(root, text='        Qual livro deseja devolver?', font= ('Roboto', 15))
+    label.pack( pady=20)
+    menu_button(telaMembros)
+    label=ttk.Label(root, text='Clique na setinha e escolha a opção a ser devolvida:', font= ('Roboto', 10))
+    label.pack( pady=20)
+    ISBN=ttk.Combobox(root,bootstyle="info", font=("Helvetica", 15), values= dataList('emprestimos'))
+    ISBN.pack (pady = 5)
+    b=ttk.Button(root, text='confirmar', style='success.TButton', command= lambda: callde(ISBN.get()))
+    b.pack(pady = 10)
+
+def callde(x):
+    elementos = x.split(' - ')
+    isbn= elementos[0]
+    emprestimo1= emprestimo.Emprestimo(isbn, 'teste', 'teste', 2005)
+    emprestimo1.registrarDevolucao()
+    operacaoConcluida()
+
+#Menu principal para chamar as telas de funções
 def mainMenu():
     clear_widgets()
     root.geometry('400x350')
-    label=ttk.Label(root, text='Escolha uma opção:', font= ('Helvetica', 15))
+    label=ttk.Label(root, text='oque voce deseja gerenciar?', font= ('Helvetica', 15))
     label.pack(padx= 30, pady=20)
     createButton('Livros', 10, telaLivros)
     createButton('Membros', 10, telaMembros)
