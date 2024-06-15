@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import sqlite3
 
 class Emprestimo:
     """
@@ -27,19 +28,60 @@ class Biblioteca:
     """
 
     def __init__(self):
-        self.emprestimos = []
+        self.conn = sqlite3.connect('biblioteca.db')
+        self.cursor = self.conn.cursor()
+        self.create_table()
+
+    def create_table(self):
+        """
+        Cria a tabela 'emprestimos' no banco de dados se ela não existir.
+        """
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS emprestimos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                isbn TEXT,
+                titulo TEXT,
+                membro TEXT,
+                data_emprestimo TEXT,
+                data_devolucao_prevista TEXT,
+                data_devolucao TEXT
+            )
+        ''')
+        self.conn.commit()
 
     def registrarEmprestimo(self, isbn, titulo, membro):
         emprestimo = Emprestimo(isbn, titulo, membro)
-        self.emprestimos.append(emprestimo)
-        return emprestimo
+        if emprestimo.condicionalEmprestimo():
+            self.cursor.execute('''
+                INSERT INTO emprestimos (isbn, titulo, membro, data_emprestimo, data_devolucao_prevista, data_devolucao)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (emprestimo.isbn, emprestimo.titulo, emprestimo.membro, emprestimo.dataEmprestimo, emprestimo.dataDevolucaoPrevista, emprestimo.dataDevolucao))
+            self.conn.commit()
+            return emprestimo
+        else:
+            return False
 
     def registrarDevolucao(self, emprestimo, dataDevolucao):
         emprestimo.registrarDevolucao(dataDevolucao)
+        self.cursor.execute('''
+            UPDATE emprestimos SET data_devolucao = ? WHERE id = ?
+        ''', (dataDevolucao, emprestimo.id))
+        self.conn.commit()
 
     def livrosEmprestadosPorMembro(self, membro):
-        return [e for e in self.emprestimos if e.membro == membro]
+        self.cursor.execute('''
+            SELECT * FROM emprestimos WHERE membro = ?
+        ''', (membro,))
+        emprestimos = self.cursor.fetchall()
+        return emprestimos
 
     def membrosQueEmprestaramLivro(self, titulo):
-        return [e.membro for e in self.emprestimos if e.titulo == titulo]
+        self.cursor.execute('''
+            SELECT DISTINCT membro FROM emprestimos WHERE titulo = ?
+        ''', (titulo,))
+        membros = self.cursor.fetchall()
+        return [m[0] for m in membros]
+
+    def close(self):
+        self.conn.close()
     
