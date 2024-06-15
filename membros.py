@@ -1,7 +1,7 @@
-import sqlite3 as sql
+import sqlite3 as sqlite3
 
 
-conexao = sql.connect('dados.bd')
+conexao = sqlite3.connect('dados.bd')
 cursor= conexao.cursor()
 
 #criando classe membro

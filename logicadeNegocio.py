@@ -26,22 +26,20 @@ def condicionalEmprestimo(x):
     else:
         return False
 
-def select():
-    comando = 'SELECT * from livros'
+def select(x):
+    comando = 'SELECT * from ' + x
     cursor.execute(comando)
     a=cursor.fetchall()
-    print (a)
+    return (a)
 
 
-#membro1= membros.membro( 2, "fabao","14/06", "perto do aeroporto" )
+#membro1= membros.membro( 10, "fabao","14/06", "perto do aeroporto" )
 #print (membro1)
 #membro1.cadastrarMembro()
 #select()
 
-#livro1= livros.Livro(1, 'teste', 'teste', '20/05','acao')
+#livro1= livros.Livro(3, 'teste', 'teste', '20/05','acao')
 #livro1.cadastrarLivro()
 #print(livro1.ISBN)
 #livro1.deletarLivro()
-#select()
 
-#cursor.execute('drop table livros')

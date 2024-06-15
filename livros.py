@@ -28,3 +28,4 @@ class Livro:
         print (inserir)
         cursor.execute(inserir)
         conexao.commit()
+
